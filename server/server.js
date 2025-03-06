@@ -10,7 +10,7 @@ app.post('/api/chat', async(req, res) => {
     // const text = req.body.text
     const text = req.body
 
-    console.log(text)
+    // console.log(text)
     
     const response = await ollama.chat({
         model: "llama3.2:1b",

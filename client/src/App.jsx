@@ -4,31 +4,26 @@ import Markdown from 'react-markdown'
 const App = () => {
   const [text, setText] = useState('')
   const [reply, setReply] = useState('')
-  const [test, setTest] = useState('')
+  const [displayedText, setDisplayedText] = useState('')
+  const [loading, setLoading] = useState(false)
   const [index, setIndex] = useState(0)
   const [context, setContext] = useState([])
 
   const handleSubmit = async (e) => {
     e.preventDefault()
     console.log('Context:', context);
-  console.log('JSON Stringified Context:', JSON.stringify(context));
+    console.log('JSON Stringified Context:', JSON.stringify(context));
+    
     try {
-      setContext(prev => [...prev, {
-        role: 'user',
-        content: text
-      }])
-      // console.log(JSON.stringify(context))
+      setLoading(true)
+      setDisplayedText('')
+      setIndex(0)
       const structure = await fetch("/api/chat", {
         method: "POST",
         headers: {
           'content-type': "application/json"
         },
-        // body: JSON.stringify(
-        //   {
-        //     role: "user",
-        //     text
-        //   }
-        // )
+  
         body: JSON.stringify([...context, {
           role: 'user',
           content: text
@@ -37,11 +32,16 @@ const App = () => {
       if (structure.ok) {
         const response = await structure.json()
         setReply(response.message.content)
-        setContext(prev => [...prev, response.message])
+        setContext(prev => [...prev, {
+          role: 'user',
+          content: text
+        }, response.message])
       }
 
     } catch (error) {
       console.log(error)
+    } finally {
+      setLoading(false)
     }
   }
 
@@ -53,7 +53,7 @@ const App = () => {
       // console.log(words, index)
       const displayedPart = words.slice(0, index + 1).join(' ');
       // console.log(displayedPart)
-      setTest(displayedPart)
+      setDisplayedText(displayedPart)
 
       // Increment the part index every second (or any interval you prefer)
       const timerId = setInterval(() => {
@@ -62,6 +62,9 @@ const App = () => {
 
       return () => clearInterval(timerId)
   }, [index, reply])
+
+
+  console.log(index, reply, displayedText)
 
 
 
@@ -76,6 +79,12 @@ const App = () => {
 
   console.log(context)
 
+  // if(loading) {
+  //   return (
+  //     <div>loading...</div>
+  //   )
+  // }
+
 
   return (
     <div style={{
@@ -88,7 +97,7 @@ const App = () => {
         <button style={{ padding: "10px" }} type='submit'>Send</button>
       </form>
       <div>
-        <strong>Assistant</strong>: <Markdown>{test}</Markdown>
+        <strong>Assistant</strong>: {loading ? <div style={{color: "#db7d11", padding: "10px", fontSize: "20px"}}>loading...</div> : <Markdown>{displayedText}</Markdown>}
       </div>
     </div>
   )
