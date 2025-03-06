@@ -7,18 +7,20 @@ const app = express()
 app.use(express.json())
 
 app.post('/api/chat', async(req, res) => {
-    const text = req.body.text
+    // const text = req.body.text
+    const text = req.body
 
-    // console.log(text)
+    console.log(text)
     
     const response = await ollama.chat({
         model: "llama3.2:1b",
-        messages: [
-            {
-                role: "user",
-                content: text
-            }
-        ]
+        // messages: [
+        //     {
+        //         role: "user",
+        //         content: text
+        //     }
+        // ]
+        messages: text
     })
     return res.status(200).json(response)
     // console.log("ready")
